@@ -16,7 +16,7 @@
     <string name="to">TO</string>
     <string name="from">FROM</string>
     <string name="close">CLOSE</string>
-    <string name="done">DONE</string>
+    <string name="done">FILTER</string>
     <string name="reset">RESET</string>
     <string name="no_result_found"><![CDATA[<  There is  no result to show >]]></string>
     <string name="unknown"><![CDATA[<unknown>]]></string>
