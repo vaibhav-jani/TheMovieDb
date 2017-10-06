@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#081c24</color>
+    <color name="colorPrimaryDark">#081c24</color>
+    <color name="colorAccent">#01d277</color>
+    <color name="white_text">#ffffff</color>
+    <color name="transparent">#00000000</color>
+    <color name="movie_thumb_bg">#E6E6E6</color>
+    <color name="white">#ffffff</color>
+    <color name="textGrey">#5d5d5d</color>
+    <color name="textLightGrey">#7d7d7d</color>
+    <color name="dialogBg">#ffffff</color>
+    <color name="lightestGray">#99999999</color>
+</resources>
