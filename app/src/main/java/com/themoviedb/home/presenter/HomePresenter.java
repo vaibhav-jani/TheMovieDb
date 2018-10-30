@@ -1,9 +1,10 @@
-package com.themoviedb.presenters;
+package com.themoviedb.home.presenter;
 
 import android.util.Log;
 
 import com.themoviedb.BaseApplication;
 import com.themoviedb.apis.request.DiscoveryRequest;
+import com.themoviedb.home.HomeContract;
 import com.themoviedb.models.DiscoverModel;
 import com.themoviedb.models.MovieModel;
 import com.themoviedb.repositories.MovieRepository;
@@ -22,7 +23,7 @@ import io.reactivex.disposables.Disposable;
  * Created by vaibhav on 3/10/17.
  */
 
-public class HomePresenter {
+public class HomePresenter implements HomeContract.IHomePresenter {
 
     @Inject
     MovieRepository repository;
@@ -35,39 +36,42 @@ public class HomePresenter {
 
     private int totalPages = 1;
 
-    private HomeView homeView;
+    private HomeContract.IHomeView homeView;
 
     private List<MovieModel> movies = new ArrayList<>();
 
     private boolean loading;
 
     public HomePresenter() {
-
         BaseApplication.getInstance().getApplicationComponent().inject(this);
     }
 
-    public void startNow(HomeView homeView) {
-        this.homeView = homeView;
+    @Override
+    public void attachView(HomeContract.IHomeView baseView) {
+        this.homeView = baseView;
         if (movies != null && movies.size() > 0) {
             Log.d("HomePresenter", "Showing cashed minYear : " + minYear + ", maxYear : " + maxYear + ", page : " + page);
             homeView.showMovies(movies, minYear, maxYear);
             return;
         }
-        fetchFirst();
+        fetchFirstPage();
     }
 
-    public void fetchFirst() {
+    @Override
+    public void fetchFirstPage() {
         resetFilters();
         fetchMovies(minYear, maxYear, page);
     }
 
-    public void fetchNext() {
+    @Override
+    public void fetchNextPage() {
         int nextPage = ++page;
         if (nextPage <= totalPages) {
             fetchMovies(minYear, maxYear, nextPage);
         }
     }
 
+    @Override
     public void filterMovieList(int startYear, int endYear) {
 
         if(this.minYear == startYear && this.maxYear == endYear) {
@@ -139,20 +143,20 @@ public class HomePresenter {
         });
     }
 
+    @Override
     public boolean isLoading() {
         return loading;
     }
 
-    public interface HomeView {
-
-        void showMovies(List<MovieModel> movies, int minYear, int maxYear);
-
-        void notifyMoviesListChanged();
-
-        void showLoadingProgress();
-
-        void hideLoadingProgress();
-
-        void onError(Throwable e);
+    @Override
+    public void detachView() {
+        homeView = null;
+        /*page = 1;
+        minYear = 1;
+        minYear = DiscoveryRequest.THIS_YEAR;
+        maxYear = DiscoveryRequest.MIN_YEAR;
+        totalPages = 1;
+        loading = false;
+        movies.clear();*/
     }
 }

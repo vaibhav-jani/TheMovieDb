@@ -6,11 +6,13 @@ import com.themoviedb.apis.entity.responses.DiscoverResponseParser;
 import com.themoviedb.apis.entity.responses.MovieParser;
 import com.themoviedb.apis.request.DiscoveryRequest;
 import com.themoviedb.apis.retrofit.RestClient;
+import com.themoviedb.home.HomeContract;
+import com.themoviedb.home.presenter.HomePresenter;
 import com.themoviedb.models.DiscoverModel;
 import com.themoviedb.models.MovieDetailModel;
 import com.themoviedb.models.MovieModel;
-import com.themoviedb.presenters.HomePresenter;
-import com.themoviedb.presenters.MovieDetailPresenter;
+import com.themoviedb.moviedetails.MovieDetailsContract;
+import com.themoviedb.moviedetails.presenter.MovieDetailPresenter;
 import com.themoviedb.repositories.MovieRepository;
 
 import org.junit.Test;
@@ -25,7 +27,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Response;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -47,7 +51,7 @@ public class AppInstrumentedTest {
     public void testHomePresenter() throws Exception {
 
         HomePresenter homePresenter = new HomePresenter();
-        HomePresenter.HomeView homeView = new HomePresenter.HomeView() {
+        HomeContract.IHomeView homeView = new HomeContract.IHomeView() {
 
             @Override
             public void showMovies(List<MovieModel> movies, int minYear, int maxYear) {
@@ -57,7 +61,7 @@ public class AppInstrumentedTest {
 
                 assertNotNull(movies);
 
-                if(movies.size() > 0) {
+                if (movies.size() > 0) {
                     assertNotNull(movies.get(0));
                 }
             }
@@ -82,7 +86,7 @@ public class AppInstrumentedTest {
 
             }
         };
-        homePresenter.startNow(homeView);
+        homePresenter.attachView(homeView);
     }
 
     @Test
@@ -90,7 +94,7 @@ public class AppInstrumentedTest {
 
         MovieDetailPresenter presenter = new MovieDetailPresenter();
 
-        MovieDetailPresenter.MovieDetailView view = new MovieDetailPresenter.MovieDetailView() {
+        MovieDetailsContract.IMovieDetailView view = new MovieDetailsContract.IMovieDetailView() {
             @Override
             public void showMovieDetail(MovieDetailModel movieDetailModel) {
 
@@ -112,13 +116,16 @@ public class AppInstrumentedTest {
 
             }
         };
-        presenter.startNow(view, 550);
+        presenter.attachView(view);
+        presenter.fetchMovie(550);
     }
 
     @Test
     public void testTheMovieRepository() throws Exception {
 
-        Observable<DiscoverModel> discoverObservable = movieRepository.discover(DiscoveryRequest.MIN_YEAR, DiscoveryRequest.MAX_YEAR, 1);
+        Observable<DiscoverModel> discoverObservable = movieRepository.discover(DiscoveryRequest.MIN_YEAR,
+                                                                                DiscoveryRequest.MAX_YEAR,
+                                                                                1);
 
         discoverObservable.subscribe(new Observer<DiscoverModel>() {
 
@@ -135,7 +142,7 @@ public class AppInstrumentedTest {
                 List<MovieModel> movieParsers = discoverModel.getMovies();
                 assertNotNull(movieParsers);
 
-                if(movieParsers.size() > 0) {
+                if (movieParsers.size() > 0) {
                     assertNotNull(movieParsers.get(0));
                 }
             }
@@ -164,7 +171,8 @@ public class AppInstrumentedTest {
         String releaseDateGte = "1900-01-01";
         String withOriginalLanguage = "en";
 
-        Observable<Response<DiscoverResponseParser>> discoverObservable = RestClient.get().discover(apiKey, page, sortBy, releaseDateLte, releaseDateGte, withOriginalLanguage);
+        Observable<Response<DiscoverResponseParser>> discoverObservable = RestClient.get()
+                .discover(apiKey, page, sortBy, releaseDateLte, releaseDateGte, withOriginalLanguage);
 
         discoverObservable = discoverObservable.subscribeOn(Schedulers.newThread());
         discoverObservable = discoverObservable.observeOn(AndroidSchedulers.mainThread());
@@ -186,7 +194,7 @@ public class AppInstrumentedTest {
                 List<MovieParser> movieParsers = body.getMovieParsers();
                 assertNotNull(movieParsers);
 
-                if(movieParsers.size() > 0) {
+                if (movieParsers.size() > 0) {
                     assertNotNull(movieParsers.get(0));
                 }
             }

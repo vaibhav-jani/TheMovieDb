@@ -1,16 +1,12 @@
-package com.themoviedb.presenters;
+package com.themoviedb.moviedetails.presenter;
 
 import android.util.Log;
 
 import com.themoviedb.BaseApplication;
-import com.themoviedb.apis.request.DiscoveryRequest;
-import com.themoviedb.models.DiscoverModel;
+import com.themoviedb.home.HomeContract;
 import com.themoviedb.models.MovieDetailModel;
-import com.themoviedb.models.MovieModel;
+import com.themoviedb.moviedetails.MovieDetailsContract;
 import com.themoviedb.repositories.MovieRepository;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -19,19 +15,16 @@ import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 
-import static android.R.attr.endYear;
-import static android.R.attr.startYear;
-
 /**
  * Created by vaibhav on 3/10/17.
  */
 
-public class MovieDetailPresenter {
+public class MovieDetailPresenter implements MovieDetailsContract.IMovieDetailPresenter {
 
     @Inject
     MovieRepository repository;
 
-    private MovieDetailView movieDetailView;
+    private MovieDetailsContract.IMovieDetailView movieDetailView;
 
     private MovieDetailModel movieDetail;
 
@@ -42,21 +35,23 @@ public class MovieDetailPresenter {
         BaseApplication.getInstance().getApplicationComponent().inject(this);
     }
 
-    public void startNow(MovieDetailView view, int movieId) {
+    @Override
+    public void attachView(MovieDetailsContract.IMovieDetailView view) {
         this.movieDetailView = view;
-        this.movieId = movieId;
-        if (movieDetail != null) {
-            Log.d("MovieDetailPresenter", "Showing cashed ");
-            view.showMovieDetail(movieDetail);
-            return;
-        }
-        fetchMovie(movieId);
     }
 
+    @Override
     public void fetchMovie(int id) {
+
+        if (movieId == id && movieDetail != null) {
+            Log.d("MovieDetailPresenter", "Showing cashed ");
+            movieDetailView.showMovieDetail(movieDetail);
+            return;
+        }
 
         Log.d("MovieDetailPresenter", "Fetching from API");
 
+        this.movieId = movieId;
         Observable<MovieDetailModel> observable = repository.getMovieDetail(id);
         observable.subscribe(new Observer<MovieDetailModel>() {
             @Override
@@ -87,19 +82,9 @@ public class MovieDetailPresenter {
         });
     }
 
-    public void cleanUp() {
+    @Override
+    public void detachView() {
         movieId = 0;
         movieDetail = null;
-    }
-
-    public interface MovieDetailView {
-
-        void showMovieDetail(MovieDetailModel movieDetailModel);
-
-        void showLoadingProgress();
-
-        void hideLoadingProgress();
-
-        void onError(Throwable e);
     }
 }

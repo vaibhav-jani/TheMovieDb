@@ -1,4 +1,4 @@
-package com.themoviedb.activities;
+package com.themoviedb.base;
 
 import android.support.v7.app.AppCompatActivity;
 
