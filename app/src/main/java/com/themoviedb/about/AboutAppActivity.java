@@ -1,4 +1,4 @@
-package com.themoviedb.activities;
+package com.themoviedb.about;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -9,7 +9,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.util.Linkify;
 import android.view.MenuItem;
 import android.widget.TextView;
 

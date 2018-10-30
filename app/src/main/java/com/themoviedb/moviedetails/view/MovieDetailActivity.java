@@ -1,10 +1,9 @@
-package com.themoviedb.activities;
+package com.themoviedb.moviedetails.view;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -25,13 +24,14 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.themoviedb.BaseApplication;
 import com.themoviedb.R;
+import com.themoviedb.base.BaseActivity;
 import com.themoviedb.glide.GlideApp;
 import com.themoviedb.models.GenreModel;
 import com.themoviedb.models.MovieDetailModel;
 import com.themoviedb.models.MovieModel;
 import com.themoviedb.models.ProductionCountryModel;
 import com.themoviedb.models.SpokenLanguageModel;
-import com.themoviedb.presenters.MovieDetailPresenter;
+import com.themoviedb.moviedetails.MovieDetailsContract;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -43,13 +43,13 @@ import javax.inject.Inject;
  * Created by vaibhav on 6/10/17.
  */
 
-public class MovieDetailActivity extends BaseActivity implements MovieDetailPresenter.MovieDetailView {
+public class MovieDetailActivity extends BaseActivity implements MovieDetailsContract.IMovieDetailView {
 
     public static final String EXTRA_MOVIE_ID = "extra_movie_id";
     public static final String EXTRA_MOVIE_NAME = "extra_movie_name";
 
     @Inject
-    MovieDetailPresenter presenter;
+    MovieDetailsContract.IMovieDetailPresenter presenter;
 
     private ImageView ivThumbnail;
     private View loadingProgressView;
@@ -77,7 +77,8 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailPres
         setNavigationAndToolBar();
 
         int movieId = getIntent().getIntExtra(EXTRA_MOVIE_ID, 0);
-        presenter.startNow(this, movieId);
+        presenter.attachView(this);
+        presenter.fetchMovie(movieId);
     }
 
     private void initViews() {
@@ -151,7 +152,10 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailPres
                     .dontAnimate()
                     .listener(new RequestListener<Drawable>() {
                         @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        public boolean onLoadFailed(@Nullable GlideException e,
+                                                    Object model,
+                                                    Target<Drawable> target,
+                                                    boolean isFirstResource) {
                             supportStartPostponedEnterTransition();
                             //AppBarLayout appBarLayout = findViewById(R.id.appbar);
                             //appBarLayout.setExpanded(false);
@@ -159,7 +163,11 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailPres
                         }
 
                         @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        public boolean onResourceReady(Drawable resource,
+                                                       Object model,
+                                                       Target<Drawable> target,
+                                                       DataSource dataSource,
+                                                       boolean isFirstResource) {
                             supportStartPostponedEnterTransition();
                             return false;
                         }
@@ -266,12 +274,6 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailPres
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        presenter.cleanUp();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -285,7 +287,12 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailPres
 
     private void exit() {
         ActivityCompat.finishAfterTransition(this);
-        presenter.cleanUp();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
     }
 
     @Override
@@ -293,9 +300,13 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailPres
         throwable.printStackTrace();
         hideLoadingProgress();
         if (throwable instanceof UnknownHostException || throwable instanceof SocketTimeoutException) {
-            Snackbar.make(detailsView, getString(R.string.check_network_connection) + " : " + throwable.getMessage(), Snackbar.LENGTH_LONG).show();
+            Snackbar.make(detailsView,
+                          getString(R.string.check_network_connection) + " : " + throwable.getMessage(),
+                          Snackbar.LENGTH_LONG).show();
             return;
         }
-        Snackbar.make(detailsView, getString(R.string.something_went_wrong) + " : " + throwable.getMessage(), Snackbar.LENGTH_LONG).show();
+        Snackbar.make(detailsView,
+                      getString(R.string.something_went_wrong) + " : " + throwable.getMessage(),
+                      Snackbar.LENGTH_LONG).show();
     }
 }

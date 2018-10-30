@@ -1,4 +1,4 @@
-package com.themoviedb.activities;
+package com.themoviedb.home.view;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -19,14 +19,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
-import android.widget.Toast;
 
 import com.themoviedb.BaseApplication;
 import com.themoviedb.R;
-import com.themoviedb.adapters.MovieListAdapter;
+import com.themoviedb.about.AboutAppActivity;
 import com.themoviedb.apis.request.DiscoveryRequest;
+import com.themoviedb.base.BaseActivity;
+import com.themoviedb.home.HomeContract;
 import com.themoviedb.models.MovieModel;
-import com.themoviedb.presenters.HomePresenter;
+import com.themoviedb.moviedetails.view.MovieDetailActivity;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -35,10 +36,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 public class HomeActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, HomePresenter.HomeView {
+        implements NavigationView.OnNavigationItemSelectedListener, HomeContract.IHomeView {
 
     @Inject
-    HomePresenter presenter;
+    HomeContract.IHomePresenter presenter;
 
     private DrawerLayout drawer;
     private RecyclerView rvMovies;
@@ -63,13 +64,13 @@ public class HomeActivity extends BaseActivity
         initViews();
         setNavigationAndToolBar();
 
-        presenter.startNow(this);
+        presenter.attachView(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(!presenter.isLoading()) {
+        if (!presenter.isLoading()) {
             hideLoadingProgress();
         }
     }
@@ -142,11 +143,11 @@ public class HomeActivity extends BaseActivity
 
     private void resetFilters() {
         hideFilterMenu();
-        presenter.fetchFirst();
+        presenter.fetchFirstPage();
     }
 
     private void fetchNext() {
-        presenter.fetchNext();
+        presenter.fetchNextPage();
     }
 
     private void filter() {
@@ -166,8 +167,8 @@ public class HomeActivity extends BaseActivity
 
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this,
-                        view,
-                        ViewCompat.getTransitionName(view));
+                                             view,
+                                             ViewCompat.getTransitionName(view));
         startActivity(intent, options.toBundle());
         showLoadingProgress();
         //startActivity(intent);
@@ -294,14 +295,24 @@ public class HomeActivity extends BaseActivity
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
+    }
+
+    @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
         hideLoadingProgress();
         if (throwable instanceof UnknownHostException || throwable instanceof SocketTimeoutException) {
-            Snackbar.make(drawer, getString(R.string.check_network_connection) + " : " + throwable.getMessage(), Snackbar.LENGTH_LONG).show();
+            Snackbar.make(drawer,
+                          getString(R.string.check_network_connection) + " : " + throwable.getMessage(),
+                          Snackbar.LENGTH_LONG).show();
             return;
         }
-        Snackbar.make(drawer, getString(R.string.something_went_wrong) + " : " + throwable.getMessage(), Snackbar.LENGTH_LONG).show();
+        Snackbar.make(drawer,
+                      getString(R.string.something_went_wrong) + " : " + throwable.getMessage(),
+                      Snackbar.LENGTH_LONG).show();
     }
 
 }

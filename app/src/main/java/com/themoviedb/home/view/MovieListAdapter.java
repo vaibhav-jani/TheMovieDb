@@ -1,4 +1,4 @@
-package com.themoviedb.adapters;
+package com.themoviedb.home.view;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
