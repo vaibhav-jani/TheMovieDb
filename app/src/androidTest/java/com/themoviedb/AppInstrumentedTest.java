@@ -11,7 +11,7 @@ import com.themoviedb.home.presenter.HomePresenter;
 import com.themoviedb.models.DiscoverModel;
 import com.themoviedb.models.MovieDetailModel;
 import com.themoviedb.models.MovieModel;
-import com.themoviedb.moviedetails.MovieDetailsContract;
+import com.themoviedb.moviedetails.MovieDetailContract;
 import com.themoviedb.moviedetails.presenter.MovieDetailPresenter;
 import com.themoviedb.repositories.MovieRepository;
 
@@ -67,11 +67,6 @@ public class AppInstrumentedTest {
             }
 
             @Override
-            public void notifyMoviesListChanged() {
-
-            }
-
-            @Override
             public void showLoadingProgress() {
 
             }
@@ -94,7 +89,7 @@ public class AppInstrumentedTest {
 
         MovieDetailPresenter presenter = new MovieDetailPresenter();
 
-        MovieDetailsContract.IMovieDetailView view = new MovieDetailsContract.IMovieDetailView() {
+        MovieDetailContract.IMovieDetailView view = new MovieDetailContract.IMovieDetailView() {
             @Override
             public void showMovieDetail(MovieDetailModel movieDetailModel) {
 

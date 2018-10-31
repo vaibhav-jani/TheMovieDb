@@ -2,8 +2,9 @@ package com.themoviedb.modules;
 
 import com.themoviedb.home.HomeContract;
 import com.themoviedb.home.presenter.HomePresenter;
-import com.themoviedb.moviedetails.MovieDetailsContract;
+import com.themoviedb.moviedetails.MovieDetailContract;
 import com.themoviedb.moviedetails.presenter.MovieDetailPresenter;
+import com.themoviedb.repositories.IMovieRepository;
 import com.themoviedb.repositories.MovieRepository;
 
 import javax.inject.Singleton;
@@ -26,13 +27,13 @@ public class ApplicationModule {
 
     @Provides
     @Singleton
-    public MovieDetailsContract.IMovieDetailPresenter providesMovieDetailPresenter() {
+    public MovieDetailContract.IMovieDetailPresenter providesMovieDetailPresenter() {
         return new MovieDetailPresenter();
     }
 
     @Provides
     @Singleton
-    public MovieRepository providesMoviesRepository() {
+    public IMovieRepository providesMoviesRepository() {
         return new MovieRepository();
     }
 

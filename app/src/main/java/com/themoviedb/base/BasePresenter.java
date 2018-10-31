@@ -1,8 +1,10 @@
 package com.themoviedb.base;
 
-public interface BasePresenter<T extends BaseView> {
+public interface BasePresenter<V extends BaseView, S extends BaseState> {
 
-    void attachView(T view);
+    void attachView(V view);
 
     void detachView();
+
+    void updateView(S state);
 }

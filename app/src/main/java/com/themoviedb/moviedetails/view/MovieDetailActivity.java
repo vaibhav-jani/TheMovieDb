@@ -3,6 +3,7 @@ package com.themoviedb.moviedetails.view;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
@@ -31,7 +32,7 @@ import com.themoviedb.models.MovieDetailModel;
 import com.themoviedb.models.MovieModel;
 import com.themoviedb.models.ProductionCountryModel;
 import com.themoviedb.models.SpokenLanguageModel;
-import com.themoviedb.moviedetails.MovieDetailsContract;
+import com.themoviedb.moviedetails.MovieDetailContract;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -43,13 +44,13 @@ import javax.inject.Inject;
  * Created by vaibhav on 6/10/17.
  */
 
-public class MovieDetailActivity extends BaseActivity implements MovieDetailsContract.IMovieDetailView {
+public class MovieDetailActivity extends BaseActivity implements MovieDetailContract.IMovieDetailView {
 
     public static final String EXTRA_MOVIE_ID = "extra_movie_id";
     public static final String EXTRA_MOVIE_NAME = "extra_movie_name";
 
     @Inject
-    MovieDetailsContract.IMovieDetailPresenter presenter;
+    MovieDetailContract.IMovieDetailPresenter presenter;
 
     private ImageView ivThumbnail;
     private View loadingProgressView;
@@ -124,9 +125,9 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailsCon
     }
 
     @Override
-    public void showMovieDetail(MovieDetailModel model) {
+    public void showMovieDetail(@NonNull MovieDetailModel model) {
 
-        if (isFinishing() || model == null) {
+        if (isFinishing()) {
             exit();
             Toast.makeText(this, R.string.no_movie_detail, Toast.LENGTH_LONG).show();
             return;

@@ -4,30 +4,30 @@ import android.util.Log;
 
 import com.themoviedb.BaseApplication;
 import com.themoviedb.models.MovieDetailModel;
-import com.themoviedb.moviedetails.MovieDetailsContract;
-import com.themoviedb.repositories.MovieRepository;
+import com.themoviedb.moviedetails.MovieDetailContract;
+import com.themoviedb.repositories.IMovieRepository;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.annotations.Nullable;
 import io.reactivex.disposables.Disposable;
 
 /**
  * Created by vaibhav on 3/10/17.
  */
 
-public class MovieDetailPresenter implements MovieDetailsContract.IMovieDetailPresenter {
+public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPresenter {
 
     @Inject
-    MovieRepository repository;
+    IMovieRepository repository;
 
-    private MovieDetailsContract.IMovieDetailView view;
+    @Nullable
+    private MovieDetailContract.IMovieDetailView view;
 
-    private MovieDetailModel movieDetail;
-
-    private int movieId;
+    private MovieDetailContract.MovieDetailState state = new MovieDetailContract.MovieDetailState();
 
     public MovieDetailPresenter() {
 
@@ -35,27 +35,27 @@ public class MovieDetailPresenter implements MovieDetailsContract.IMovieDetailPr
     }
 
     @Override
-    public void attachView(MovieDetailsContract.IMovieDetailView view) {
+    public void attachView(MovieDetailContract.IMovieDetailView view) {
         this.view = view;
     }
 
     @Override
-    public void fetchMovie(int id) {
+    public void fetchMovie(final int id) {
 
-        if (movieId == id && movieDetail != null) {
+        if (state.getMovieId() == id && state.getMovieDetail() != null) {
             Log.d("MovieDetailPresenter", "Showing cashed ");
-            view.showMovieDetail(movieDetail);
+            updateView(state);
             return;
         }
 
         Log.d("MovieDetailPresenter", "Fetching from API");
-
-        this.movieId = id;
         Observable<MovieDetailModel> observable = repository.getMovieDetail(id);
         observable.subscribe(new Observer<MovieDetailModel>() {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
-                view.showLoadingProgress();
+                state = new MovieDetailContract.MovieDetailState();
+                state.setLoading(true);
+                updateView(state);
             }
 
             @Override
@@ -64,19 +64,21 @@ public class MovieDetailPresenter implements MovieDetailsContract.IMovieDetailPr
                 if (model == null) {
                     return;
                 }
-                movieDetail = model;
-                view.showMovieDetail(model);
+                state = new MovieDetailContract.MovieDetailState(model, id, false);
+                updateView(state);
             }
 
             @Override
             public void onError(@NonNull Throwable e) {
-
-                view.onError(e);
+                state.setLoading(false);
+                state.setError(e);
+                updateView(state);
             }
 
             @Override
             public void onComplete() {
-                view.hideLoadingProgress();
+                state.setLoading(false);
+                updateView(state);
             }
         });
     }
@@ -85,4 +87,29 @@ public class MovieDetailPresenter implements MovieDetailsContract.IMovieDetailPr
     public void detachView() {
         view = null;
     }
+
+    @Override
+    public void updateView(MovieDetailContract.MovieDetailState state) {
+
+        if (view == null) {
+            return;
+        }
+
+        MovieDetailModel movieDetail = state.getMovieDetail();
+        if (movieDetail != null) {
+            view.showMovieDetail(movieDetail);
+        }
+
+        if (state.isLoading()) {
+            view.showLoadingProgress();
+        } else {
+            view.hideLoadingProgress();
+        }
+
+        Throwable error = state.getError();
+        if (error != null) {
+            view.onError(error);
+        }
+    }
+
 }

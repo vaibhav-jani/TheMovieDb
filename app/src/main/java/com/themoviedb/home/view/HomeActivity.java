@@ -70,9 +70,6 @@ public class HomeActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (!presenter.isLoading()) {
-            hideLoadingProgress();
-        }
     }
 
     private void initViews() {
@@ -98,9 +95,6 @@ public class HomeActivity extends BaseActivity
         RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (presenter.isLoading()) {
-                    return;
-                }
                 int visibleItemCount = layoutManager.getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
@@ -268,14 +262,6 @@ public class HomeActivity extends BaseActivity
         if (emptyView != null) {
             emptyView.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public void notifyMoviesListChanged() {
-        if (isFinishing()) {
-            return;
-        }
-        movieListAdapter.notifyMoviesListChanged();
     }
 
     @Override

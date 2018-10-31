@@ -24,10 +24,11 @@ import retrofit2.Response;
  * Created by vaibhav on 3/10/17.
  */
 
-public class MovieRepository {
+public class MovieRepository implements IMovieRepository {
 
     private static final String API_KEY = "1e457e1a40b0d8133c7ef44f74260961";
 
+    @Override
     public Observable<MovieDetailModel> getMovieDetail(int id) {
 
         Observable<Response<MovieDetailParser>> observable = RestClient.get().getMovieDetail(id, API_KEY);
@@ -50,6 +51,7 @@ public class MovieRepository {
         });
     }
 
+    @Override
     public Observable<DiscoverModel> discover(int page) {
 
         String sortBy = "release_date.desc";
@@ -70,6 +72,7 @@ public class MovieRepository {
         return discover(request);
     }
 
+    @Override
     public Observable<DiscoverModel> discover(int yearStart, int yearEnd, int page) {
 
         String sortBy = "release_date.asc";
