@@ -22,7 +22,7 @@ public interface HomeContract {
         void onError(Throwable e);
     }
 
-    interface IHomePresenter extends BasePresenter<IHomeView, HomeViewState> {
+    interface IHomePresenter extends BasePresenter<IHomeView> {
 
         void fetchFirstPage();
 
@@ -31,7 +31,7 @@ public interface HomeContract {
         void filterMovieList(int startYear, int endYear);
     }
 
-    class HomeViewState implements BaseState {
+    class HomeFeedsViewState implements BaseState {
 
         private int page = 1;
 
@@ -47,15 +47,15 @@ public interface HomeContract {
 
         private boolean loading;
 
-        public HomeViewState() {
+        public HomeFeedsViewState() {
 
         }
 
-        public HomeViewState(int page,
-                             int minYear,
-                             int maxYear,
-                             int totalPages,
-                             List<MovieModel> movies, boolean loading) {
+        public HomeFeedsViewState(int page,
+                                  int minYear,
+                                  int maxYear,
+                                  int totalPages,
+                                  List<MovieModel> movies, boolean loading) {
             this.page = page;
             this.minYear = minYear;
             this.maxYear = maxYear;

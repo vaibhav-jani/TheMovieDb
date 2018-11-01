@@ -1,5 +1,6 @@
 package com.themoviedb.moviedetails.view;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -8,14 +9,20 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,12 +34,14 @@ import com.themoviedb.BaseApplication;
 import com.themoviedb.R;
 import com.themoviedb.base.BaseActivity;
 import com.themoviedb.glide.GlideApp;
+import com.themoviedb.home.view.MovieListAdapter;
 import com.themoviedb.models.GenreModel;
 import com.themoviedb.models.MovieDetailModel;
 import com.themoviedb.models.MovieModel;
 import com.themoviedb.models.ProductionCountryModel;
 import com.themoviedb.models.SpokenLanguageModel;
 import com.themoviedb.moviedetails.MovieDetailContract;
+import com.themoviedb.moviedetails.MovieDetailContract.IMovieDetailPresenter;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -50,7 +59,7 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
     public static final String EXTRA_MOVIE_NAME = "extra_movie_name";
 
     @Inject
-    MovieDetailContract.IMovieDetailPresenter presenter;
+    IMovieDetailPresenter presenter;
 
     private ImageView ivThumbnail;
     private View loadingProgressView;
@@ -63,6 +72,7 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
     private TextView tvRatings;
     private TextView tvVotes;
     private TextView tvWebSite;
+    private MovieListAdapter movieListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +90,7 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
         int movieId = getIntent().getIntExtra(EXTRA_MOVIE_ID, 0);
         presenter.attachView(this);
         presenter.fetchMovie(movieId);
+        presenter.fetchSimilarMovie(movieId);
     }
 
     private void initViews() {
@@ -94,6 +105,32 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
         tvRatings = findViewById(R.id.tvRatings);
         tvVotes = findViewById(R.id.tvVotes);
         tvWebSite = findViewById(R.id.tvWebSite);
+
+        RecyclerView rvSimilarMovies = findViewById(R.id.rvSimilarMovies);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        rvSimilarMovies.setLayoutManager(layoutManager);
+
+        movieListAdapter = new MovieListAdapter(this, R.layout.row_similar_movie);
+        movieListAdapter.setMovieSelectionListener(new MovieListAdapter.OnMovieSelectionListener() {
+            @Override
+            public void onMovieSelected(MovieModel model, View view, int position) {
+                movieSelected(model, view, position);
+            }
+        });
+        rvSimilarMovies.setAdapter(movieListAdapter);
+    }
+
+    private void movieSelected(MovieModel model, View view, int position) {
+        if (isFinishing()) {
+            return;
+        }
+        Intent intent = new Intent(this, MovieDetailActivity.class);
+        intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_ID, model.getId());
+        intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_NAME, model.getTitle());
+        showLoadingProgress();
+        startActivity(intent);
+        finish();
     }
 
     private void setNavigationAndToolBar() {
@@ -256,6 +293,18 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
                 tvWebSite.setText(homepage);
             }
         }
+    }
+
+    @Override
+    public void showSimilarMovies(List<MovieModel> movies) {
+        if (isFinishing()) {
+            return;
+        }
+        if (movies == null) {
+            return;
+        }
+
+        movieListAdapter.setMovies(movies);
     }
 
     @Override

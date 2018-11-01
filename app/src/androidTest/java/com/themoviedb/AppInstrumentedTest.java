@@ -97,6 +97,11 @@ public class AppInstrumentedTest {
             }
 
             @Override
+            public void showSimilarMovies(List<MovieModel> movies) {
+
+            }
+
+            @Override
             public void showLoadingProgress() {
 
             }
@@ -167,7 +172,7 @@ public class AppInstrumentedTest {
         String withOriginalLanguage = "en";
 
         Observable<Response<DiscoverResponseParser>> discoverObservable = RestClient.get()
-                .discover(apiKey, page, sortBy, releaseDateLte, releaseDateGte, withOriginalLanguage);
+                .discover(page, sortBy, releaseDateLte, releaseDateGte, withOriginalLanguage, apiKey);
 
         discoverObservable = discoverObservable.subscribeOn(Schedulers.newThread());
         discoverObservable = discoverObservable.observeOn(AndroidSchedulers.mainThread());

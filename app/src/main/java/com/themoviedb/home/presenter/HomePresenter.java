@@ -3,7 +3,10 @@ package com.themoviedb.home.presenter;
 import android.util.Log;
 
 import com.themoviedb.BaseApplication;
+import com.themoviedb.base.BaseState;
 import com.themoviedb.home.HomeContract;
+import com.themoviedb.home.HomeContract.HomeFeedsViewState;
+import com.themoviedb.home.HomeContract.IHomeView;
 import com.themoviedb.models.DiscoverModel;
 import com.themoviedb.models.MovieModel;
 import com.themoviedb.repositories.IMovieRepository;
@@ -28,20 +31,20 @@ public class HomePresenter implements HomeContract.IHomePresenter {
     IMovieRepository repository;
 
     @Nullable
-    private HomeContract.IHomeView view;
+    private IHomeView view;
 
-    private HomeContract.HomeViewState state = new HomeContract.HomeViewState();
+    private HomeFeedsViewState feedViewState = new HomeFeedsViewState();
 
     public HomePresenter() {
         BaseApplication.getInstance().getApplicationComponent().inject(this);
     }
 
     @Override
-    public void attachView(HomeContract.IHomeView homeView) {
+    public void attachView(IHomeView homeView) {
         this.view = homeView;
-        updateView(state);
+        updateView(feedViewState);
 
-        if (state.getMovies().isEmpty() && !state.isLoading()) {
+        if (feedViewState.getMovies().isEmpty() && !feedViewState.isLoading()) {
             fetchFirstPage();
         }
     }
@@ -49,30 +52,30 @@ public class HomePresenter implements HomeContract.IHomePresenter {
     @Override
     public void fetchFirstPage() {
         resetFilters();
-        fetchMovies(state.getMinYear(), state.getMaxYear(), state.getPage());
+        fetchMovies(feedViewState.getMinYear(), feedViewState.getMaxYear(), feedViewState.getPage());
     }
 
     @Override
     public void fetchNextPage() {
-        int nextPage = state.getPage() + 1;
-        if (nextPage <= state.getTotalPages()) {
-            fetchMovies(state.getMinYear(), state.getMaxYear(), nextPage);
+        int nextPage = feedViewState.getPage() + 1;
+        if (nextPage <= feedViewState.getTotalPages()) {
+            fetchMovies(feedViewState.getMinYear(), feedViewState.getMaxYear(), nextPage);
         }
     }
 
     @Override
     public void filterMovieList(int startYear, int endYear) {
 
-        if (state.getMinYear() == startYear && state.getMaxYear() == endYear) {
+        if (feedViewState.getMinYear() == startYear && feedViewState.getMaxYear() == endYear) {
             return;
         }
 
-        fetchMovies(startYear, endYear, state.getPage());
+        fetchMovies(startYear, endYear, feedViewState.getPage());
     }
 
     private void resetFilters() {
-        state = new HomeContract.HomeViewState();
-        fetchMovies(state.getMinYear(), state.getMaxYear(), state.getPage());
+        feedViewState = new HomeFeedsViewState();
+        fetchMovies(feedViewState.getMinYear(), feedViewState.getMaxYear(), feedViewState.getPage());
     }
 
     private void fetchMovies(final int minYear, final int maxYear, final int nextPage) {
@@ -80,7 +83,7 @@ public class HomePresenter implements HomeContract.IHomePresenter {
         Log.d("HomePresenter",
               "Fetching from API : minYear : " + minYear + ", maxYear : " + maxYear + ", page : " + nextPage);
 
-        if (state.isLoading()) {
+        if (feedViewState.isLoading()) {
             return;
         }
 
@@ -89,8 +92,8 @@ public class HomePresenter implements HomeContract.IHomePresenter {
         observable.subscribe(new Observer<DiscoverModel>() {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
-                state.setLoading(true);
-                updateView(state);
+                feedViewState.setLoading(true);
+                updateView(feedViewState);
             }
 
             @Override
@@ -102,10 +105,10 @@ public class HomePresenter implements HomeContract.IHomePresenter {
                 int page = discoverModel.getPage();
                 int totalPages = discoverModel.getTotalPages();
 
-                int currentMinYear = state.getMinYear();
-                int currentMaxYear = state.getMaxYear();
+                int currentMinYear = feedViewState.getMinYear();
+                int currentMaxYear = feedViewState.getMaxYear();
 
-                List<MovieModel> existingMovies = state.getMovies();
+                List<MovieModel> existingMovies = feedViewState.getMovies();
                 List<MovieModel> newList = discoverModel.getMovies();
                 if (newList != null) {
                     boolean isMovieListEmpty = existingMovies == null || existingMovies.size() == 0;
@@ -117,27 +120,27 @@ public class HomePresenter implements HomeContract.IHomePresenter {
                     }
                 }
 
-                state = new HomeContract.HomeViewState(page, minYear, maxYear, totalPages, existingMovies, false);
-                updateView(state);
+                feedViewState = new HomeFeedsViewState(page, minYear, maxYear, totalPages, existingMovies, false);
+                updateView(feedViewState);
             }
 
             @Override
             public void onError(@NonNull Throwable e) {
-                state.setLoading(false);
-                state.setError(e);
-                updateView(state);
+                feedViewState.setLoading(false);
+                feedViewState.setError(e);
+                updateView(feedViewState);
             }
 
             @Override
             public void onComplete() {
-                state.setLoading(false);
-                updateView(state);
+                feedViewState.setLoading(false);
+                updateView(feedViewState);
             }
         });
     }
 
     public boolean isLoading() {
-        return state.isLoading();
+        return feedViewState.isLoading();
     }
 
     @Override
@@ -146,7 +149,19 @@ public class HomePresenter implements HomeContract.IHomePresenter {
     }
 
     @Override
-    public void updateView(HomeContract.HomeViewState state) {
+    public void updateView(BaseState state) {
+
+        if (view == null) {
+            return;
+        }
+
+        if (state instanceof HomeFeedsViewState) {
+            updateHomeView((HomeFeedsViewState) state);
+        }
+    }
+
+    private void updateHomeView(HomeFeedsViewState state) {
+
         if (view == null) {
             return;
         }

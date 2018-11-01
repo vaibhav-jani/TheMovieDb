@@ -10,7 +10,7 @@
     <string name="by_vaibhav_jani">A movie database</string>
     <string name="check_network_connection">Unable to connect to TheMovieDb, Please check your network connection.</string>
     <string name="action_filter">Filter</string>
-    <string name="select_year_range">Select the year range : </string>
+    <string name="select_year_range">Select the year range:</string>
     <string name="starting">Starting : </string>
     <string name="ending">Ending : </string>
     <string name="to">TO</string>
@@ -20,16 +20,17 @@
     <string name="reset">RESET</string>
     <string name="no_result_found"><![CDATA[<  There is  no result to show >]]></string>
     <string name="unknown"><![CDATA[<unknown>]]></string>
-    <string name="overview">Overview :</string>
-    <string name="genre">Genre :</string>
-    <string name="languages">Languages :</string>
-    <string name="countries">Countries :</string>
-    <string name="release_date">Release Date :</string>
-    <string name="ratings">Ratings : </string>
-    <string name="votes">Votes Count : </string>
-    <string name="official_website">Official Website</string>
+    <string name="overview">Overview:</string>
+    <string name="genre">Genre:</string>
+    <string name="languages">Languages:</string>
+    <string name="countries">Countries:</string>
+    <string name="release_date">Release Date:</string>
+    <string name="ratings">Ratings: </string>
+    <string name="votes">Votes Count: </string>
+    <string name="official_website">Official Website:</string>
     <string name="place_holder_dash">- -</string>
     <string name="no_movie_detail">Movie Detail not Available</string>
     <string name="thumb_transition_name">thumbImage</string>
     <string name="title_activity_about_app">AboutAppActivity</string>
+    <string name="similar_movies">Similar Movies:</string>
 </resources>

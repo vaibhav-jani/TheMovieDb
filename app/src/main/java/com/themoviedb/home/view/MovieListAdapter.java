@@ -28,7 +28,7 @@ import java.util.List;
  * Created by vaibhav on 5/10/17.
  */
 
-public class MovieListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MovieViewHolder>
         implements ListPreloader.PreloadSizeProvider<MovieModel>,
         ListPreloader.PreloadModelProvider<MovieModel> {
 
@@ -44,10 +44,13 @@ public class MovieListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private int[] actualDimensions;
 
-    public MovieListAdapter(Activity activity) {
+    private int rawResourceId;
+
+    public MovieListAdapter(Activity activity, int rawResourceId) {
 
         this.activity = activity;
         inflater = LayoutInflater.from(activity);
+        this.rawResourceId = rawResourceId;
 
         GlideRequests requestManager = GlideApp.with(activity);
         requestBuilder = requestManager.asDrawable().fitCenter();
@@ -55,9 +58,10 @@ public class MovieListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         setHasStableIds(true);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View view = inflater.inflate(R.layout.row_movie, parent, false);
+    public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        final View view = inflater.inflate(rawResourceId, parent, false);
 
         if (actualDimensions == null) {
             view.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -76,9 +80,8 @@ public class MovieListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(@NonNull final MovieViewHolder holder, final int position) {
 
-        final MovieViewHolder holder = (MovieViewHolder) viewHolder;
         final MovieModel model = movies.get(position);
 
         String name = model.getTitle();
@@ -165,14 +168,14 @@ public class MovieListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return actualDimensions;
     }
 
-    private static class MovieViewHolder extends RecyclerView.ViewHolder {
+    public static class MovieViewHolder extends RecyclerView.ViewHolder {
 
         public View view;
         public TextView tvName;
         public TextView tvYear;
         public ImageView ivThumbnail;
 
-        public MovieViewHolder(View view) {
+        private MovieViewHolder(View view) {
             super(view);
             this.view = view;
             this.ivThumbnail = view.findViewById(R.id.ivThumbnail);

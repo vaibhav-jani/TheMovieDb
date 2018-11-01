@@ -3,9 +3,17 @@ package com.themoviedb.moviedetails.presenter;
 import android.util.Log;
 
 import com.themoviedb.BaseApplication;
+import com.themoviedb.base.BaseState;
+import com.themoviedb.models.DiscoverModel;
 import com.themoviedb.models.MovieDetailModel;
+import com.themoviedb.models.MovieModel;
 import com.themoviedb.moviedetails.MovieDetailContract;
+import com.themoviedb.moviedetails.MovieDetailContract.IMovieDetailView;
+import com.themoviedb.moviedetails.MovieDetailContract.MovieDetailState;
+import com.themoviedb.moviedetails.MovieDetailContract.SimilarMovieListState;
 import com.themoviedb.repositories.IMovieRepository;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -25,9 +33,11 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
     IMovieRepository repository;
 
     @Nullable
-    private MovieDetailContract.IMovieDetailView view;
+    private IMovieDetailView view;
 
-    private MovieDetailContract.MovieDetailState state = new MovieDetailContract.MovieDetailState();
+    private MovieDetailState detailState = new MovieDetailState();
+
+    private SimilarMovieListState similarListState = new SimilarMovieListState();
 
     public MovieDetailPresenter() {
 
@@ -35,16 +45,16 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
     }
 
     @Override
-    public void attachView(MovieDetailContract.IMovieDetailView view) {
+    public void attachView(IMovieDetailView view) {
         this.view = view;
     }
 
     @Override
     public void fetchMovie(final int id) {
 
-        if (state.getMovieId() == id && state.getMovieDetail() != null) {
+        if (detailState.getMovieId() == id && detailState.getMovieDetail() != null) {
             Log.d("MovieDetailPresenter", "Showing cashed ");
-            updateView(state);
+            updateView(detailState);
             return;
         }
 
@@ -53,9 +63,9 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
         observable.subscribe(new Observer<MovieDetailModel>() {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
-                state = new MovieDetailContract.MovieDetailState();
-                state.setLoading(true);
-                updateView(state);
+                detailState = new MovieDetailState();
+                detailState.setLoading(true);
+                updateView(detailState);
             }
 
             @Override
@@ -64,21 +74,65 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
                 if (model == null) {
                     return;
                 }
-                state = new MovieDetailContract.MovieDetailState(model, id, false);
-                updateView(state);
+                detailState = new MovieDetailState(model, id, false);
+                updateView(detailState);
             }
 
             @Override
             public void onError(@NonNull Throwable e) {
-                state.setLoading(false);
-                state.setError(e);
-                updateView(state);
+                detailState.setLoading(false);
+                detailState.setError(e);
+                updateView(detailState);
             }
 
             @Override
             public void onComplete() {
-                state.setLoading(false);
-                updateView(state);
+                detailState.setLoading(false);
+                updateView(detailState);
+            }
+        });
+    }
+
+    @Override
+    public void fetchSimilarMovie(final int id) {
+
+        if (similarListState.getMovieId() == id || similarListState.isLoading()) {
+            Log.d("MovieDetailPresenter", "Showing cashed similar list");
+            updateView(similarListState);
+            return;
+        }
+
+        Log.d("MovieDetailPresenter", "Fetching similar movies from API");
+        repository.getSimilarMovies(550).subscribe(new Observer<DiscoverModel>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                similarListState.setLoading(true);
+                updateView(similarListState);
+            }
+
+            @Override
+            public void onNext(DiscoverModel discoverModel) {
+
+                if (discoverModel == null) {
+                    return;
+                }
+
+                List<MovieModel> movies = discoverModel.getMovies();
+                similarListState = new SimilarMovieListState(movies, id, false);
+                updateView(similarListState);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                similarListState.setLoading(false);
+                similarListState.setError(e);
+                updateView(similarListState);
+            }
+
+            @Override
+            public void onComplete() {
+                similarListState.setLoading(false);
+                updateView(similarListState);
             }
         });
     }
@@ -89,7 +143,34 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
     }
 
     @Override
-    public void updateView(MovieDetailContract.MovieDetailState state) {
+    public void updateView(@NonNull BaseState state) {
+
+        if (view == null) {
+            return;
+        }
+
+        if (state instanceof MovieDetailState) {
+            updateMovieDetailView((MovieDetailState) state);
+        }
+
+        if (state instanceof SimilarMovieListState) {
+            updateSimilarMoviesListView((SimilarMovieListState) state);
+        }
+    }
+
+    private void updateSimilarMoviesListView(SimilarMovieListState state) {
+
+        if (view == null) {
+            return;
+        }
+
+        List<MovieModel> movies = state.getMovies();
+        if (movies != null && !movies.isEmpty()) {
+            view.showSimilarMovies(movies);
+        }
+    }
+
+    private void updateMovieDetailView(@NonNull MovieDetailState state) {
 
         if (view == null) {
             return;

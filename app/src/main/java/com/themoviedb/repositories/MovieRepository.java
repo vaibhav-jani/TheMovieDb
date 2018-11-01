@@ -52,6 +52,30 @@ public class MovieRepository implements IMovieRepository {
     }
 
     @Override
+    public Observable<DiscoverModel> getSimilarMovies(int movieId) {
+
+        Observable<Response<DiscoverResponseParser>> discoverObservable =
+                RestClient.get().getSimilarMovies(movieId, API_KEY);
+
+        discoverObservable = discoverObservable.subscribeOn(Schedulers.newThread());
+        discoverObservable = discoverObservable.observeOn(AndroidSchedulers.mainThread());
+
+        return discoverObservable.map(new Function<Response<DiscoverResponseParser>, DiscoverModel>() {
+
+            @Override
+            public DiscoverModel apply(@NonNull Response<DiscoverResponseParser> response) throws Exception {
+
+                if (response.isSuccessful()) {
+                    DiscoverResponseParser parser = response.body();
+                    return new DiscoverModel(parser);
+                }
+
+                return null;
+            }
+        });
+    }
+
+    @Override
     public Observable<DiscoverModel> discover(int page) {
 
         String sortBy = "release_date.desc";
@@ -113,7 +137,8 @@ public class MovieRepository implements IMovieRepository {
                 "\nwithOriginalLanguage : " + withOriginalLanguage +
                 "\nsortBy : " + sortBy);
 
-        Observable<Response<DiscoverResponseParser>> discoverObservable = RestClient.get().discover(API_KEY, page, sortBy, releaseDateLte, releaseDateGte, withOriginalLanguage);
+        Observable<Response<DiscoverResponseParser>> discoverObservable = RestClient.get()
+                .discover(page, sortBy, releaseDateLte, releaseDateGte, withOriginalLanguage, API_KEY);
 
         discoverObservable = discoverObservable.subscribeOn(Schedulers.newThread());
         discoverObservable = discoverObservable.observeOn(AndroidSchedulers.mainThread());

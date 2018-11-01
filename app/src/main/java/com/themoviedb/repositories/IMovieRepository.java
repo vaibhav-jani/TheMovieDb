@@ -9,6 +9,8 @@ public interface IMovieRepository {
 
     Observable<MovieDetailModel> getMovieDetail(int id);
 
+    Observable<DiscoverModel> getSimilarMovies(int movieId);
+
     Observable<DiscoverModel> discover(int page);
 
     Observable<DiscoverModel> discover(int yearStart, int yearEnd, int page);

@@ -26,6 +26,7 @@ import com.themoviedb.about.AboutAppActivity;
 import com.themoviedb.apis.request.DiscoveryRequest;
 import com.themoviedb.base.BaseActivity;
 import com.themoviedb.home.HomeContract;
+import com.themoviedb.home.HomeContract.IHomePresenter;
 import com.themoviedb.models.MovieModel;
 import com.themoviedb.moviedetails.view.MovieDetailActivity;
 
@@ -39,17 +40,14 @@ public class HomeActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, HomeContract.IHomeView {
 
     @Inject
-    HomeContract.IHomePresenter presenter;
+    IHomePresenter presenter;
 
     private DrawerLayout drawer;
-    private RecyclerView rvMovies;
     private View loadingProgressView;
     private View filterView;
     private View emptyView;
     private NumberPicker numberPicker1;
     private NumberPicker numberPicker2;
-    private Button btnResetFilters;
-    private Button btnFilterDone;
 
     private MovieListAdapter movieListAdapter;
 
@@ -74,7 +72,7 @@ public class HomeActivity extends BaseActivity
 
     private void initViews() {
         drawer = findViewById(R.id.drawer_layout);
-        rvMovies = findViewById(R.id.rvMovies);
+        RecyclerView rvMovies = findViewById(R.id.rvMovies);
 
         int spanCount = 2;
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -83,7 +81,7 @@ public class HomeActivity extends BaseActivity
         final GridLayoutManager layoutManager = new GridLayoutManager(this, spanCount);
         rvMovies.setLayoutManager(layoutManager);
 
-        movieListAdapter = new MovieListAdapter(this);
+        movieListAdapter = new MovieListAdapter(this, R.layout.row_movie);
         movieListAdapter.setMovieSelectionListener(new MovieListAdapter.OnMovieSelectionListener() {
             @Override
             public void onMovieSelected(MovieModel model, View view, int position) {
@@ -118,7 +116,7 @@ public class HomeActivity extends BaseActivity
         numberPicker1.setMaxValue(DiscoveryRequest.MAX_YEAR);
         numberPicker2.setMaxValue(DiscoveryRequest.MAX_YEAR);
 
-        btnFilterDone = findViewById(R.id.btnDone);
+        Button btnFilterDone = findViewById(R.id.btnDone);
         btnFilterDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -126,7 +124,7 @@ public class HomeActivity extends BaseActivity
             }
         });
 
-        btnResetFilters = findViewById(R.id.btnReset);
+        Button btnResetFilters = findViewById(R.id.btnReset);
         btnResetFilters.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -166,6 +164,12 @@ public class HomeActivity extends BaseActivity
         startActivity(intent, options.toBundle());
         showLoadingProgress();
         //startActivity(intent);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        hideLoadingProgress();
     }
 
     private void setNavigationAndToolBar() {
