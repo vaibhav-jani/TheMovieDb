@@ -18,7 +18,7 @@
     <string name="close">CLOSE</string>
     <string name="done">FILTER</string>
     <string name="reset">RESET</string>
-    <string name="no_result_found"><![CDATA[<  There is  no result to show >]]></string>
+    <string name="no_result_found"><![CDATA[<  Nothing available to show >]]></string>
     <string name="unknown"><![CDATA[<unknown>]]></string>
     <string name="overview">Overview:</string>
     <string name="genre">Genre:</string>

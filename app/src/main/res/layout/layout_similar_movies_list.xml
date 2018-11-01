@@ -26,15 +26,12 @@
         android:layout_margin="@dimen/d_smaller"
         />
 
-    <TextView
-        android:id="@+id/similarEmptyView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <include
         android:layout_below="@id/tvSimilarMovies"
-        android:layout_centerInParent="true"
-        android:text="@string/no_result_found"
-        android:textColor="@color/textGrey"
-        android:textSize="@dimen/text_large"
+        android:layout_height="wrap_content"
         android:visibility="gone"
-        />
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/similarEmptyView"
+        layout="@layout/layout_empty"/>
 </RelativeLayout>
