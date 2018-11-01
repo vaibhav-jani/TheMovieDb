@@ -1,19 +1,16 @@
 package com.themoviedb.moviedetails.view;
 
-import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -22,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,8 +52,6 @@ import javax.inject.Inject;
 public class MovieDetailActivity extends BaseActivity implements MovieDetailContract.IMovieDetailView {
 
     public static final String EXTRA_MOVIE_ID = "extra_movie_id";
-    public static final String EXTRA_MOVIE_NAME = "extra_movie_name";
-
     @Inject
     IMovieDetailPresenter presenter;
 
@@ -72,7 +66,11 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
     private TextView tvRatings;
     private TextView tvVotes;
     private TextView tvWebSite;
+    private View similarEmptyView;
+    private CollapsingToolbarLayout collapsingToolbar;
     private MovieListAdapter movieListAdapter;
+    private AppBarLayout appBarLayout;
+    private RecyclerView rvSimilarMovies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,8 +103,8 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
         tvRatings = findViewById(R.id.tvRatings);
         tvVotes = findViewById(R.id.tvVotes);
         tvWebSite = findViewById(R.id.tvWebSite);
-
-        RecyclerView rvSimilarMovies = findViewById(R.id.rvSimilarMovies);
+        similarEmptyView = findViewById(R.id.similarEmptyView);
+        rvSimilarMovies = findViewById(R.id.rvSimilarMovies);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         rvSimilarMovies.setLayoutManager(layoutManager);
@@ -125,12 +123,13 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
         if (isFinishing()) {
             return;
         }
-        Intent intent = new Intent(this, MovieDetailActivity.class);
+        /*Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_ID, model.getId());
         intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_NAME, model.getTitle());
-        showLoadingProgress();
         startActivity(intent);
-        finish();
+        finish();*/
+        presenter.fetchMovie(model.getId());
+        presenter.fetchSimilarMovie(model.getId());
     }
 
     private void setNavigationAndToolBar() {
@@ -138,7 +137,10 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsingToolbar);
+        appBarLayout = findViewById(R.id.appbar);
+        //appBarLayout.setExpanded(false);
+
+        collapsingToolbar = findViewById(R.id.collapsingToolbar);
         //collapsingToolbar.setContentScrimColor(ContextCompat.getColor(this, R.color.colorPrimary));
         collapsingToolbar.setTitleEnabled(true);
 
@@ -152,8 +154,6 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
 
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
-            String movieName = getIntent().getStringExtra(EXTRA_MOVIE_NAME);
-            collapsingToolbar.setTitle(movieName);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
             Drawable drawable = ContextCompat.getDrawable(this, R.drawable.back_arrow);
             drawable.setColorFilter(ContextCompat.getColor(this, R.color.white), PorterDuff.Mode.SRC_IN);
@@ -172,12 +172,15 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
 
         hideLoadingProgress();
 
+        appBarLayout.setExpanded(true);
         detailsView.setVisibility(View.VISIBLE);
 
         MovieModel movie = model.getMovie();
 
         if (movie != null) {
             String thumbnail = movie.getLargePosterPath();
+
+            collapsingToolbar.setTitle(movie.getTitle());
 
             /*GlideApp.with(this).load(thumbnail)
                     .into(ivThumbnail);*/
@@ -195,8 +198,6 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
                                                     Target<Drawable> target,
                                                     boolean isFirstResource) {
                             supportStartPostponedEnterTransition();
-                            //AppBarLayout appBarLayout = findViewById(R.id.appbar);
-                            //appBarLayout.setExpanded(false);
                             return false;
                         }
 
@@ -297,13 +298,20 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
 
     @Override
     public void showSimilarMovies(List<MovieModel> movies) {
+
         if (isFinishing()) {
             return;
         }
-        if (movies == null) {
+
+        if (movies == null || movies.isEmpty()) {
+            similarEmptyView.setVisibility(View.VISIBLE);
+            rvSimilarMovies.setVisibility(View.GONE);
             return;
         }
 
+        rvSimilarMovies.smoothScrollToPosition(0);
+        similarEmptyView.setVisibility(View.GONE);
+        rvSimilarMovies.setVisibility(View.VISIBLE);
         movieListAdapter.setMovies(movies);
     }
 

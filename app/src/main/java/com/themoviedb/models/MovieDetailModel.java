@@ -47,6 +47,7 @@ public class MovieDetailModel {
             return;
         }
 
+        this.id = parser.getId();
         this.movie = new MovieModel();
         this.movie.setId(parser.getId());
         this.movie.setVideo(parser.isVideo());
@@ -180,5 +181,9 @@ public class MovieDetailModel {
 
     public void setTagline(String tagline) {
         this.tagline = tagline;
+    }
+
+    public int getId() {
+        return id;
     }
 }

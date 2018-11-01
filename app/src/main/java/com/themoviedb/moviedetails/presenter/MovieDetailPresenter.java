@@ -96,14 +96,14 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
     @Override
     public void fetchSimilarMovie(final int id) {
 
-        if (similarListState.getMovieId() == id || similarListState.isLoading()) {
+        if (similarListState.getMovieId() == id && !similarListState.getMovies().isEmpty()) {
             Log.d("MovieDetailPresenter", "Showing cashed similar list");
             updateView(similarListState);
             return;
         }
 
         Log.d("MovieDetailPresenter", "Fetching similar movies from API");
-        repository.getSimilarMovies(550).subscribe(new Observer<DiscoverModel>() {
+        repository.getSimilarMovies(id).subscribe(new Observer<DiscoverModel>() {
             @Override
             public void onSubscribe(Disposable d) {
                 similarListState.setLoading(true);
@@ -165,9 +165,7 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
         }
 
         List<MovieModel> movies = state.getMovies();
-        if (movies != null && !movies.isEmpty()) {
-            view.showSimilarMovies(movies);
-        }
+        view.showSimilarMovies(movies);
     }
 
     private void updateMovieDetailView(@NonNull MovieDetailState state) {

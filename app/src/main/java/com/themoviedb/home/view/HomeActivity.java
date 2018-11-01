@@ -48,7 +48,6 @@ public class HomeActivity extends BaseActivity
     private View emptyView;
     private NumberPicker numberPicker1;
     private NumberPicker numberPicker2;
-
     private MovieListAdapter movieListAdapter;
 
     @Override
@@ -155,8 +154,6 @@ public class HomeActivity extends BaseActivity
         }
         Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_ID, model.getId());
-        intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_NAME, model.getTitle());
-
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this,
                                              view,
