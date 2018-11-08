@@ -17,20 +17,8 @@ import dagger.Provides;
  */
 
 @Module
-public class ApplicationModule {
-
-    @Provides
-    @Singleton
-    public HomeContract.IHomePresenter providesHomePresenter() {
-        return new HomePresenter();
-    }
-
-    @Provides
-    @Singleton
-    public MovieDetailContract.IMovieDetailPresenter providesMovieDetailPresenter() {
-        return new MovieDetailPresenter();
-    }
-
+public class DataModule {
+    
     @Provides
     @Singleton
     public IMovieRepository providesMoviesRepository() {

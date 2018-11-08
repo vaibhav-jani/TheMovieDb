@@ -2,9 +2,12 @@ package com.themoviedb;
 
 import android.app.Application;
 
-import com.themoviedb.components.ApplicationComponent;
-import com.themoviedb.components.DaggerApplicationComponent;
-import com.themoviedb.modules.ApplicationModule;
+import com.themoviedb.components.DaggerDataComponent;
+import com.themoviedb.components.DaggerPresenterComponent;
+import com.themoviedb.components.DataComponent;
+import com.themoviedb.components.PresenterComponent;
+import com.themoviedb.modules.DataModule;
+import com.themoviedb.modules.PresenterModule;
 
 /**
  * Created by vaibhav on 3/10/17.
@@ -14,25 +17,34 @@ public class BaseApplication extends Application {
 
     private static BaseApplication instance;
 
-    private ApplicationComponent applicationComponent;
+    private DataComponent dataComponent;
+    private PresenterComponent presenterComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
 
-        applicationComponent = DaggerApplicationComponent
+        dataComponent = DaggerDataComponent
                 .builder()
-                .applicationModule(new ApplicationModule())
+                .dataModule(new DataModule())
                 .build();
 
+        presenterComponent = DaggerPresenterComponent
+                .builder()
+                .presenterModule(new PresenterModule())
+                .build();
     }
 
     public static BaseApplication getInstance() {
         return instance;
     }
 
-    public ApplicationComponent getApplicationComponent() {
-        return applicationComponent;
+    public DataComponent getDataComponent() {
+        return dataComponent;
+    }
+
+    public PresenterComponent getPresenterComponent() {
+        return presenterComponent;
     }
 }

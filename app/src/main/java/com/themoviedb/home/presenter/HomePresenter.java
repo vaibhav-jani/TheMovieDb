@@ -36,7 +36,7 @@ public class HomePresenter implements HomeContract.IHomePresenter {
     private HomeFeedsViewState feedViewState = new HomeFeedsViewState();
 
     public HomePresenter() {
-        BaseApplication.getInstance().getApplicationComponent().inject(this);
+        BaseApplication.getInstance().getDataComponent().inject(this);
     }
 
     @Override

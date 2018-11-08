@@ -54,7 +54,7 @@ public class HomeActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        BaseApplication.getInstance().getApplicationComponent().inject(this);
+        BaseApplication.getInstance().getPresenterComponent().inject(this);
 
         setContentView(R.layout.activity_home);
 

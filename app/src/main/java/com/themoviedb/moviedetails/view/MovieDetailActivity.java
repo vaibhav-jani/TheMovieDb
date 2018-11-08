@@ -78,7 +78,7 @@ public class MovieDetailActivity extends BaseActivity implements MovieDetailCont
 
         supportPostponeEnterTransition();
 
-        BaseApplication.getInstance().getApplicationComponent().inject(this);
+        BaseApplication.getInstance().getPresenterComponent().inject(this);
 
         setContentView(R.layout.activity_movie_detail);
 

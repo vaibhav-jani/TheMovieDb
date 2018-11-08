@@ -41,7 +41,7 @@ public class MovieDetailPresenter implements MovieDetailContract.IMovieDetailPre
 
     public MovieDetailPresenter() {
 
-        BaseApplication.getInstance().getApplicationComponent().inject(this);
+        BaseApplication.getInstance().getDataComponent().inject(this);
     }
 
     @Override
